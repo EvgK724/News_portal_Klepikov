@@ -1,0 +1,164 @@
+>>> from portal.models import *
+#1
+>>> u1 = User.objects.create_user(username='Darya')
+>>> u1
+<User: Darya>
+>>> u2 = User.objects.create_user(username='Vladimir')
+>>> u2
+<User: Vladimir>
+#2
+>>> Author.objects.create(author_user=u1)
+<Author: Author object (1)>
+>>> Author.objects.create(author_user=u2)
+<Author: Author object (2)>
+#3
+>>> Category.objects.create(name='Sports')
+<Category: Category object (1)>
+>>> Category.objects.create(name='Education')
+<Category: Category object (2)>
+>>> Category.objects.create(name='Politics')
+<Category: Category object (3)>
+>>> Category.objects.create(name='IT')
+<Category: Category object (4)>
+#4
+>>> author = Author.objects.get(id=1)
+>>> author
+<Author: Author object (1)>
+>>> Post.objects.create(author=author, category_type='AR', title='sometitle', text='sometext')
+<Post: Post object (1)>
+>>> author2 = Author.objects.get(id=2)
+>>> author2
+<Author: Author object (2)>
+>>> Post.objects.create(author=author2, category_type='AR', title='sometitle2', text='somebigtext')
+<Post: Post object (2)>
+>>> Post.objects.create(author=author2, category_type='NW', title='sometitle3', text='somenewtext')
+<Post: Post object (3)>
+#5
+>>> Post.objects.get(id=1).post_category.add(Category.objects.get(id=1))
+>>> Post.objects.get(id=1).post_category.add(Category.objects.get(id=2))
+>>> Post.objects.get(id=2).post_category.add(Category.objects.get(id=3))
+>>> Post.objects.get(id=2).post_category.add(Category.objects.get(id=4))
+>>> Post.objects.get(id=3).post_category.add(Category.objects.get(id=2))
+>>> Post.objects.get(id=3).post_category.add(Category.objects.get(id=4))
+#6
+>>> Comment.objects.create(comment_post=Post.objects.get(id=1), comment_user=author.author_user, text='anyauthortext')
+<Comment: Comment object (1)>
+>>> Comment.objects.create(comment_post=Post.objects.get(id=2), comment_user=author2.author_user, text='anyauthorbigtext')
+<Comment: Comment object (2)>
+>>> Comment.objects.create(comment_post=Post.objects.get(id=2), comment_user=author.author_user, text='anyauthornewtext')
+<Comment: Comment object (3)>
+>>> Comment.objects.create(comment_post=Post.objects.get(id=3), comment_user=author2.author_user, text='anyauthormegatext')
+<Comment: Comment object (4)>
+#7
+>>> Comment.objects.get(id=1).like()
+>>> Comment.objects.get(id=1).rating
+1
+>>> Comment.objects.get(id=2).rating
+0
+>>> Comment.objects.get(id=3).rating
+0
+>>> Comment.objects.get(id=3).dislike()
+>>> Comment.objects.get(id=3).dislike()
+>>> Comment.objects.get(id=3).rating
+-2
+>>> Comment.objects.get(id=2).like()
+>>> Comment.objects.get(id=2).like()
+>>> Comment.objects.get(id=2).like()
+>>> Comment.objects.get(id=2).like()
+>>> Comment.objects.get(id=3).dislike()
+>>> Comment.objects.get(id=3).dislike()
+>>> Comment.objects.get(id=3).dislike()
+>>> Comment.objects.get(id=3).dislike()
+>>> Comment.objects.get(id=3).dislike()
+>>> Comment.objects.get(id=3).rating
+-7
+>>> Comment.objects.get(id=1).rating
+1
+>>> Comment.objects.get(id=2).rating
+4
+>>> Comment.objects.get(id=3).rating
+-7
+>>> Comment.objects.get(id=4).rating
+0
+>>> Comment.objects.get(id=4).rating
+0
+>>> Comment.objects.get(id=4).like()
+>>> Comment.objects.get(id=4).like()
+>>> Comment.objects.get(id=4).like()
+>>> Comment.objects.get(id=4).rating
+3
+>>> Comment.objects.get(id=4).like()
+>>> Comment.objects.get(id=4).dislike()
+>>> Comment.objects.get(id=4).rating
+3
+>>> Comment.objects.get(id=1).rating
+1
+>>> Comment.objects.get(id=2).rating
+4
+>>> Comment.objects.get(id=3).rating
+-7
+>>> Comment.objects.get(id=4).rating
+3
+>>> Comment.objects.get(id=3).like()
+>>> Comment.objects.get(id=3).like()
+>>> Comment.objects.get(id=3).rating
+-5
+>>> Post.objects.get(id=1).like()
+>>> Post.objects.get(id=1).like()
+>>> Post.objects.get(id=1).rating
+2
+>>> Post.objects.get(id=2).like()
+>>> Post.objects.get(id=2).like()
+>>> Post.objects.get(id=2).like()
+>>> Post.objects.get(id=2).like()
+>>> Post.objects.get(id=3).dislike()
+>>> Post.objects.get(id=3).dislike()
+>>> Post.objects.get(id=2).dislike()
+>>> Post.objects.get(id=2).rating
+3
+>>> Post.objects.get(id=3).rating
+-2
+>>> Post.objects.get(id=1).rating
+2
+#8
+>>> author.update_rating()
+>>> author.author_rating
+2
+>>> author2.update_rating()
+>>> author2.author_rating
+10
+>>> Post.objects.get(id=1).like()
+>>> author.update_rating()
+>>> author.author_rating
+5
+#9
+>>> a = Author.objects.order_by('-author_rating')[:1]
+>>> a
+<QuerySet [<Author: Author object (2)>]>
+>>> for i in a:
+...     i.author_rating
+...     i.author_user.username
+...
+10
+'Vladimir'
+#10
+>>> b = Post.objects.order_by('-rating')[:1]
+>>> for i in b:
+...     i.date_create
+...     i.author.author_user
+...     i.rating
+...     i.title
+...     i.preview()
+...
+datetime.datetime(2023, 1, 8, 8, 29, 47, 215887, tzinfo=datetime.timezone.utc)
+<User: Darya>
+3
+'sometitle'
+'sometext...'
+#11
+>>> c = Post.objects.order_by('-rating')[0]
+>>> c.comment_set.all().values('date_create', 'comment_user', 'rating', 'text')
+<QuerySet [{'date_create': datetime.datetime(2023, 1, 8, 8, 52, 28, 599559, tzinfo=datetime.timezone.utc), 'comment_user': 3, 'rating': 1, 'text': 'anyauthortext'}]>
+
+
+
