@@ -1,0 +1,15 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+New edit
+{% endblock title %}
+
+{% block content %}
+      <h1>Редактировать новость</h1>
+      <hr>
+      <form action="" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Редактировать"/>
+      </form>
+{% endblock content %}
