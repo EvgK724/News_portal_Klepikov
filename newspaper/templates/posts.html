@@ -1,4 +1,5 @@
 {% extends 'flatpages/default.html' %}
+
 {% load custom_filters %}
 {% load custom_tags %}
 
@@ -7,16 +8,22 @@ Posts
 {% endblock title %}
 
 {% block content %}
+
     <h1>Все новости и статьи</h1>
 
     <h3>{% current_time '%b %d %Y' %}</h3>
-<!--    <form action="" method="get">-->
-<!--       {{ filterset.form.as_p }}-->
-<!--       <input type="submit" value="Найти" />-->
-<!--    </form>-->
 
     <h3>Количество постов: {{ posts_list|length }} из {{ paginator.count }}</h3>
     <hr>
+
+    {% if perms.portal.add_post %}
+        {% if post.category_type == 'NW' %}
+            <a href="{% url 'news_create' %}">Добавить новость</a>
+        {% else %}
+            <a href="{% url 'articles_create' %}">Добавить новость</a>
+        {% endif %}
+    {% endif %}
+
     {% if posts_list %}
         <table align="center">
             <tr>
@@ -24,6 +31,10 @@ Posts
                 <td>Описание</td>
                 <td>Дата публикации</td>
                 <td>Тип</td>
+                <td>Категория</td>
+                {% if perms.portal.change_post or perms.portal.delete_post %}
+                <td>Действия</td>
+                {% endif %}
             </tr>
 
             {% for post in posts_list %}
@@ -32,6 +43,27 @@ Posts
                 <td>{{ post.text|censor|truncatechars:20 }}</td>
                 <td>{{ post.date_create|date:'d M Y' }}</td>
                 <td>{{ post.category_type }}</td>
+                <td>
+                    {% for n in post.post_category.all %}
+                        {{ n.name }}
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if perms.portal.change_post %}
+                        {% if post.category_type == 'NW' %}
+                            <a href="{% url 'news_edit' pk=post.id %}">Изменить</a>
+                        {% else %}
+                            <a href="{% url 'articles_edit' pk=post.id %}">Изменить</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if perms.portal.delete_post %}
+                        {% if post.category_type == 'NW' %}
+                            <a href="{% url 'news_delete' pk=post.id %}">Удалить</a>
+                        {% else %}
+                            <a href="{% url 'articles_delete' pk=post.id %}">Удалить</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
                 <td><a href="{{ post.id }}">Подробнее</a></td>
             </tr>
             {% endfor %}

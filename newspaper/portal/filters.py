@@ -1,7 +1,7 @@
 import django_filters
 from django_filters import FilterSet, DateTimeFilter
 from django.forms import DateTimeInput
-from .models import Post, Category, Author
+from .models import Post
 
 
 class PostFilter(FilterSet):
@@ -28,12 +28,3 @@ class PostFilter(FilterSet):
             attrs={'type': 'datetime-local'},
         )
     )
-    #
-    # class Meta:
-    #     model = Post
-    #     fields = [
-    #         'title',
-    #     ]
-    #     labels = {
-    #         'title': 'Заголовок',
-    #     }
